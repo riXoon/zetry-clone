@@ -3,18 +3,22 @@ import Button from './Button';
 import { TiLocationArrow } from 'react-icons/ti';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
+import { use } from 'react';
+import ScrollTrigger from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
   const [loadedVideos, setLoadedVideos] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   const totalVideos = 4;
   const nextVideoRef = useRef(null);
   const miniVideoRef = useRef(null);
 
   const handleVideoLoad = () => {
-    e.preventDefault();
     setLoadedVideos((prev) => prev + 1);
   };
 
@@ -35,12 +39,19 @@ const Hero = () => {
   };
 
   useEffect(() => {
+    if (loadedVideos === totalVideos - 1){
+      setIsLoading(false);
+    }
+  });
+
+  useEffect(() => {
     if (hasClicked && miniVideoRef.current) {
       // After the click, change the mini video thumbnail to the next video
       miniVideoRef.current.src = getVideoSrc(upcomingVideoIndex);
     }
   }, [hasClicked, upcomingVideoIndex]);
 
+  //GSAP function for the video transition when clicking the mini video thumbnail
   useGSAP(
     () => {
       if (hasClicked) {
@@ -57,6 +68,9 @@ const Hero = () => {
           duration: 1,
           ease: 'power1.inOut',
           onStart: () => nextVideoRef.current?.play(),
+          onComplete: () => {
+            setHasClicked(false);
+          }
         });
 
         // Keep the current video visible while animating
@@ -83,8 +97,41 @@ const Hero = () => {
     }
   );
 
+  //GSAP function for scroll animation
+  useGSAP( () => {
+    gsap.set('#video-frame', {
+        clipPath: 'polygon(14% 0%, 72% 0%, 90% 90%, 0% 100%)',
+        borderRadius: '0 0 40% 10%'
+    });
+
+    gsap.from(
+      '#video-frame',{
+        clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+        borderRadius: '0 0 0 0',
+        ease: 'power1.inOut',
+        scrollTrigger: {
+          trigger: '#video-frame',
+          start: 'center center',
+          end: 'bottom center',
+          scrub: true,
+        }
+      }
+    )
+  });
+
   return (
     <div className="relative h-dvh w-screen overflow-x-hidden">
+
+      {isLoading && (
+        <div className='flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50'>
+          <div className='three-body'>
+            <div className='three-body__dot'></div>
+            <div className='three-body__dot'></div>
+            <div className='three-body__dot'></div>
+          </div>
+        </div>
+      )}
+
       <div
         id="video-frame"
         className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
