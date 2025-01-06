@@ -11,6 +11,11 @@ body {
   font-family: "General Sans", sans-serif;
 }
 
+.tilt-effect {
+  transition: transform 0.3s ease-out;
+}
+
+
 @layer base {
   @font-face {
     font-family: "circular-web";
