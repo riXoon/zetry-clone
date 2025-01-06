@@ -3,10 +3,11 @@ import Button from './Button';
 import { TiLocationArrow } from 'react-icons/ti';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
-import { use } from 'react';
+
 import ScrollTrigger from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
+
 
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
@@ -142,6 +143,8 @@ const Hero = () => {
               onClick={handleMiniVdClick}
               className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
             >
+
+              {/* Mini video handler */}
               <video
                 ref={miniVideoRef}
                 src={getVideoSrc(upcomingVideoIndex)} // Set the thumbnail to next video
