@@ -3,6 +3,7 @@ import Button from './Button';
 import { TiLocationArrow } from 'react-icons/ti';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
+import VideoPreview from './VideoPreview';
 
 import ScrollTrigger from 'gsap/ScrollTrigger';
 
@@ -57,8 +58,12 @@ const Hero = () => {
     () => {
       if (hasClicked) {
         // Hide the current video to create space for the zoom-in effect of the next video
-        gsap.set('#current-video', { zIndex: 10 });
-        gsap.set('#next-video', { visibility: 'visible' });
+        gsap.set('#current-video', { zIndex: 10, clipPath:'inset(0 0 0 0)', });
+        gsap.set('#next-video', { 
+          visibility: 'visible',
+          clipPath:'inset(0 0 0 0)',
+          
+        });
 
         // Animate the zoom-in effect for the next video
         gsap.to('#next-video', {
@@ -99,26 +104,38 @@ const Hero = () => {
   );
 
   //GSAP function for scroll animation
-  useGSAP( () => {
-    gsap.set('#video-frame', {
-        clipPath: 'polygon(14% 0%, 72% 0%, 90% 90%, 0% 100%)',
-        borderRadius: '0 0 40% 10%'
-    });
-
-    gsap.from(
-      '#video-frame',{
-        clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
-        borderRadius: '0 0 0 0',
-        ease: 'power1.inOut',
-        scrollTrigger: {
-          trigger: '#video-frame',
-          start: 'center center',
-          end: 'bottom center',
-          scrub: true,
-        }
-      }
-    )
+  // GSAP function for scroll animation
+useGSAP(() => {
+  // Set the initial state of the video frame, including the black border
+  gsap.set('#video-frame', {
+    clipPath: 'polygon(14% 0%, 72% 0%, 90% 90%, 0% 100%)',
+    borderRadius: '0 0 40% 10%',
+    border: '4px solid black', // Set the black border
   });
+
+  // Animate the video frame with both the clipPath and border during the scroll
+  gsap.fromTo(
+    '#video-frame', 
+    {
+      clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+      border: '4px solid transparent', // Start with a transparent border
+      borderRadius: '0 0 0 0',
+    },
+    {
+      clipPath: 'polygon(14% 0%, 72% 0%, 90% 90%, 0% 100%)', // Final clipPath shape
+      border: '4px solid black', // Set the visible black border
+      borderRadius: '0 0 40% 10%',
+      ease: 'power1.inOut',
+      scrollTrigger: {
+        trigger: '#video-frame',
+        start: 'center center',
+        end: 'bottom center',
+        scrub: true,
+      }
+    }
+  );
+});
+
 
   return (
     <div className="relative h-dvh w-screen overflow-x-hidden">
@@ -139,23 +156,23 @@ const Hero = () => {
       >
         <div>
           <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
-            <div
-              onClick={handleMiniVdClick}
-              className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
-            >
+          <VideoPreview>
+              <div
+                onClick={handleMiniVdClick}
+                className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
+              >
+                <video
+                  ref={nextVideoRef}
+                  src={getVideoSrc((currentIndex % totalVideos) + 1)}
+                  loop
+                  muted
+                  id="current-video"
+                  className="size-64 origin-center scale-150 object-cover object-center"
+                  onLoadedData={handleVideoLoad}
+                />
+              </div>
+          </VideoPreview>
 
-              {/* Mini video handler */}
-              <video
-                ref={miniVideoRef}
-                src={getVideoSrc(upcomingVideoIndex)} // Set the thumbnail to next video
-                key={upcomingVideoIndex}
-                muted
-                loop
-                id="current-video"
-                className="size-64 origin-center scale-150 object-cover object-center"
-                onLoadedData={handleVideoLoad}
-              />
-            </div>
           </div>
 
           <video
